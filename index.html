@@ -1,38 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio File Manager</title>
+    <title>音频文件管理器</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!--<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">-->
+    <!--<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>-->
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Audio File Manager</h1>
-            <button id="uploadBtn" class="primary-btn">Upload Audio Files</button>
+            <h1>音频文件管理器</h1>
+            <button id="uploadBtn" class="primary-btn">上传音频文件</button>
         </header>
 
         <div id="uploadModal" class="modal">
             <div class="modal-content">
-                <h2>Upload Audio Files</h2>
+                <h2>上传音频文件</h2>
                 <div class="upload-area">
                     <input type="file" id="fileInput" multiple accept=".wav" style="display: none;">
                     <div class="drop-zone">
-                        <p>Drag & drop WAV files here or click to select</p>
+                        <p>拖放WAV文件到此处或点击选择</p>
                     </div>
                 </div>
                 <div class="progress-container" style="display: none;">
                     <div class="progress-bar">
                         <div class="progress"></div>
                     </div>
-                    <p class="progress-text">Uploading: <span>0%</span></p>
+                    <p class="progress-text">上传进度: <span>0%</span></p>
                 </div>
                 <div class="modal-buttons">
-                    <button id="confirmUpload" class="primary-btn" style="display: none;">Confirm</button>
-                    <button id="cancelUpload" class="secondary-btn">Cancel</button>
+                    <button id="confirmUpload" class="primary-btn" style="display: none;">确认</button>
+                    <button id="cancelUpload" class="secondary-btn">取消</button>
                 </div>
             </div>
         </div>
@@ -40,21 +40,21 @@
         <div id="audioCards" class="audio-cards"></div>
 
         <div id="batchActions" class="batch-actions" style="display: none;">
-            <button id="selectAll" class="secondary-btn">Select All</button>
-            <button id="invertSelection" class="secondary-btn">Invert Selection</button>
-            <button id="batchFavorite" class="primary-btn">Batch Favorite</button>
-            <button id="batchDelete" class="danger-btn">Batch Delete</button>
+            <button id="selectAll" class="secondary-btn">全选</button>
+            <button id="invertSelection" class="secondary-btn">反选</button>
+            <button id="batchFavorite" class="primary-btn">批量收藏</button>
+            <button id="batchDelete" class="danger-btn">批量删除</button>
         </div>
 
         <div class="favorites-section">
-            <h2>Favorites</h2>
+            <h2>收藏夹</h2>
             <table class="favorites-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Filename</th>
-                        <th>Favorite Date</th>
-                        <th>Actions</th>
+                        <th>序号</th>
+                        <th>文件名</th>
+                        <th>收藏日期</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="favoritesList"></tbody>
@@ -63,4 +63,4 @@
     </div>
     <script src="main.js"></script>
 </body>
-</html> 
+</html>

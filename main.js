@@ -21,6 +21,11 @@ uploadBtn.addEventListener('click', () => {
     uploadModal.style.display = 'block';
 });
 
+confirmUploadBtn.addEventListener('click', () => {
+    uploadModal.style.display = 'none';
+    resetUploadState();
+});
+
 cancelUploadBtn.addEventListener('click', () => {
     uploadModal.style.display = 'none';
     resetUploadState();
@@ -55,7 +60,7 @@ function handleFiles(files) {
     const wavFiles = Array.from(files).filter(file => file.type === 'audio/wav');
     
     if (wavFiles.length === 0) {
-        alert('Please select WAV files only.');
+        alert('请只选择WAV格式的文件');
         return;
     }
 
@@ -71,7 +76,7 @@ function handleFiles(files) {
     });
 
     if (filesToSkip.length > 0) {
-        const skipMessage = `The following files already exist:\n${filesToSkip.map(f => f.name).join('\n')}\n\nDo you want to overwrite them?`;
+        const skipMessage = `以下文件已存在:\n${filesToSkip.map(f => f.name).join('\n')}\n\n是否要覆盖它们?`;
         if (confirm(skipMessage)) {
             filesToUpload = [...filesToUpload, ...filesToSkip];
         }
@@ -147,10 +152,10 @@ function createAudioCard(audioFile) {
     const info = document.createElement('div');
     info.className = 'audio-info';
     info.innerHTML = `
-        <p title="${audioFile.name}">Name: ${audioFile.name}</p>
-        <p title="${audioFile.duration}">Duration: ${audioFile.duration}</p>
-        <p title="${audioFile.sampleRate}">Sample Rate: ${audioFile.sampleRate} Hz</p>
-        <p title="${audioFile.size}">Size: ${audioFile.size}</p>
+        <p title="${audioFile.name}">文件名: ${audioFile.name}</p>
+        <p title="${audioFile.duration}">时长: ${audioFile.duration}</p>
+        <p title="${audioFile.sampleRate}">采样率: ${audioFile.sampleRate} Hz</p>
+        <p title="${audioFile.size}">大小: ${audioFile.size}</p>
     `;
 
     // Create controls
@@ -158,8 +163,8 @@ function createAudioCard(audioFile) {
     controls.className = 'audio-controls';
     controls.innerHTML = `
         <input type="checkbox" class="audio-select">
-        <button class="play-btn">Play</button>
-        <button class="favorite-btn">${audioFile.isFavorite ? 'Unfavorite' : 'Favorite'}</button>
+        <button class="play-btn">播放</button>
+        <button class="favorite-btn">${audioFile.isFavorite ? '取消收藏' : '收藏'}</button>
     `;
 
     // Add event listeners
@@ -219,10 +224,10 @@ function playAudio(audioFile) {
 function toggleFavorite(filename, button) {
     if (favorites.has(filename)) {
         favorites.delete(filename);
-        button.textContent = 'Favorite';
+        button.textContent = '收藏';
     } else {
         favorites.add(filename);
-        button.textContent = 'Unfavorite';
+        button.textContent = '取消收藏';
     }
     updateFavoritesList();
 }
@@ -237,7 +242,7 @@ function updateFavoritesList() {
             <td>${new Date().toLocaleDateString()}</td>
             <td>
                 <button class="secondary-btn" onclick="removeFavorite('${filename}')">
-                    Remove from Favorites
+                    取消收藏
                 </button>
             </td>
         `;
@@ -251,12 +256,12 @@ function removeFavorite(filename) {
     const card = document.querySelector(`[data-filename="${filename}"]`);
     if (card) {
         const favoriteBtn = card.querySelector('.favorite-btn');
-        favoriteBtn.textContent = 'Favorite';
+        favoriteBtn.textContent = '收藏';
     }
 }
 
 function removeAudioFile(filename) {
-    if (confirm(`Are you sure you want to remove ${filename}?`)) {
+    if (confirm(`确定要删除 ${filename} 吗?`)) {
         audioFiles.delete(filename);
         favorites.delete(filename);
         const card = document.querySelector(`[data-filename="${filename}"]`);
@@ -293,7 +298,7 @@ document.getElementById('batchFavorite').onclick = () => {
         const favoriteBtn = card.querySelector('.favorite-btn');
         if (!favorites.has(filename)) {
             favorites.add(filename);
-            favoriteBtn.textContent = 'Unfavorite';
+            favoriteBtn.textContent = '取消收藏';
         }
     });
     updateFavoritesList();
@@ -305,7 +310,7 @@ document.getElementById('batchDelete').onclick = () => {
         return card.dataset.filename;
     });
 
-    if (confirm(`Are you sure you want to delete ${selectedFiles.length} files?`)) {
+    if (confirm(`确定要删除 ${selectedFiles.length} 个文件吗?`)) {
         selectedFiles.forEach(filename => {
             audioFiles.delete(filename);
             favorites.delete(filename);
@@ -319,9 +324,9 @@ document.getElementById('batchDelete').onclick = () => {
 
 // Utility functions
 function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '0 字节';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['字节', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
@@ -337,4 +342,4 @@ function resetUploadState() {
     progressBar.style.width = '0%';
     progressText.textContent = '0%';
     fileInput.value = '';
-} 
+}
