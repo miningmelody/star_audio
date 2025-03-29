@@ -78,6 +78,15 @@ function handleFiles(files) {
     if (filesToSkip.length > 0) {
         const skipMessage = `以下文件已存在:\n${filesToSkip.map(f => f.name).join('\n')}\n\n是否要覆盖它们?`;
         if (confirm(skipMessage)) {
+            // 先移除已存在的文件和DOM元素
+            filesToSkip.forEach(file => {
+                if (audioFiles.has(file.name)) {
+                    const card = document.querySelector(`[data-filename="${file.name}"]`);
+                    if (card) card.remove();
+                    audioFiles.delete(file.name);
+                    favorites.delete(file.name);
+                }
+            });
             filesToUpload = [...filesToUpload, ...filesToSkip];
         }
     }
@@ -141,6 +150,14 @@ function createAudioCard(audioFile) {
     waveform.id = `waveform-${audioFile.name}`;
     waveformContainer.appendChild(waveform);
 
+    // Create envelope container
+    const envelopeContainer = document.createElement('div');
+    envelopeContainer.className = 'envelope-container';
+    
+    const envelope = document.createElement('div');
+    envelope.id = `envelope-${audioFile.name}`;
+    envelopeContainer.appendChild(envelope);
+
     // Create remove button
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-btn';
@@ -179,12 +196,51 @@ function createAudioCard(audioFile) {
 
     // Assemble card
     card.appendChild(waveformContainer);
+    card.appendChild(envelopeContainer);  // 添加包络区域
     card.appendChild(info);
     card.appendChild(controls);
     audioCards.appendChild(card);
 
-    // Draw waveform
+    // Draw waveforms
     drawWaveform(audioFile);
+    drawEnvelope(audioFile);  // 新增绘制包络函数
+}
+
+// 新增绘制包络函数
+function drawEnvelope(audioFile) {
+    const envelope = document.getElementById(`envelope-${audioFile.name}`);
+    const data = audioFile.buffer.getChannelData(0);
+    const canvas = document.createElement('canvas');
+    canvas.width = 373;
+    canvas.height = 60;  // 包络区域高度较小
+    
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'var(--primary-light)';
+    
+    // 计算包络
+    const segmentSize = Math.floor(data.length / canvas.width);
+    const envelopeData = [];
+    
+    for (let i = 0; i < canvas.width; i++) {
+        const start = i * segmentSize;
+        const end = Math.min(start + segmentSize, data.length);
+        const segment = data.slice(start, end);
+        const max = Math.max(...segment.map(Math.abs));
+        envelopeData.push(max);
+    }
+    
+    // 绘制包络
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    for (let x = 0; x < canvas.width; x++) {
+        const y = canvas.height - (envelopeData[x] * canvas.height);
+        ctx.lineTo(x, y);
+    }
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+    
+    envelope.appendChild(canvas);
 }
 
 function drawWaveform(audioFile) {
@@ -194,8 +250,8 @@ function drawWaveform(audioFile) {
     const amp = 50;
     
     const canvas = document.createElement('canvas');
-    canvas.width = waveform.clientWidth;
-    canvas.height = waveform.clientHeight;
+    canvas.width = 373;
+    canvas.height = 150;
     const ctx = canvas.getContext('2d');
     
     ctx.strokeStyle = 'var(--primary-color)';
@@ -343,3 +399,33 @@ function resetUploadState() {
     progressText.textContent = '0%';
     fileInput.value = '';
 }
+
+// 在全局变量部分添加
+const menuToggle = document.createElement('div');
+menuToggle.className = 'menu-toggle';
+menuToggle.innerHTML = '☰';
+
+// 在 header 中添加菜单按钮
+document.querySelector('header').prepend(menuToggle);
+
+// 添加事件监听
+menuToggle.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('active');
+    document.querySelector('.container').classList.toggle('active');
+});
+
+// 在 DOM Elements 部分添加
+const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+
+// 事件监听器部分保持不变
+sidebarLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        sidebarLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        
+        // 这里可以添加切换不同视图的逻辑
+        const section = link.textContent.trim();
+        console.log(`切换到: ${section}`);
+    });
+});
