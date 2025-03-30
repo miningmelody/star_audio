@@ -181,7 +181,9 @@ function createAudioCard(audioFile) {
     controls.innerHTML = `
         <input type="checkbox" class="audio-select">
         <button class="play-btn">播放</button>
-        <button class="favorite-btn">${audioFile.isFavorite ? '取消收藏' : '收藏'}</button>
+        <button class="favorite-btn" data-favorite="${audioFile.isFavorite}">
+            ${audioFile.isFavorite ? '取消收藏' : '收藏'}
+        </button>
     `;
 
     // Add event listeners
@@ -251,7 +253,7 @@ function drawWaveform(audioFile) {
     
     const canvas = document.createElement('canvas');
     canvas.width = 373;
-    canvas.height = 150;
+    canvas.height = 60;
     const ctx = canvas.getContext('2d');
     
     ctx.strokeStyle = 'var(--primary-color)';
@@ -280,9 +282,11 @@ function playAudio(audioFile) {
 function toggleFavorite(filename, button) {
     if (favorites.has(filename)) {
         favorites.delete(filename);
+        button.setAttribute('data-favorite', 'false');
         button.textContent = '收藏';
     } else {
         favorites.add(filename);
+        button.setAttribute('data-favorite', 'true');
         button.textContent = '取消收藏';
     }
     updateFavoritesList();
@@ -312,6 +316,7 @@ function removeFavorite(filename) {
     const card = document.querySelector(`[data-filename="${filename}"]`);
     if (card) {
         const favoriteBtn = card.querySelector('.favorite-btn');
+        favoriteBtn.setAttribute('data-favorite', 'false');
         favoriteBtn.textContent = '收藏';
     }
 }
@@ -354,6 +359,7 @@ document.getElementById('batchFavorite').onclick = () => {
         const favoriteBtn = card.querySelector('.favorite-btn');
         if (!favorites.has(filename)) {
             favorites.add(filename);
+            favoriteBtn.setAttribute('data-favorite', 'true');
             favoriteBtn.textContent = '取消收藏';
         }
     });
