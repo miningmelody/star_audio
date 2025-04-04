@@ -104,8 +104,24 @@ async function uploadFiles(files) {
         const file = files[i];
         const progress = ((i + 1) / files.length) * 100;
         
-        // Simulate file upload (replace with actual upload logic)
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Upload file to backend
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const response = await fetch('http://localhost:8000/api/upload-file/', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('文件上传失败');
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert(`上传文件 ${file.name} 失败: ${error.message}`);
+            continue;
+        }
         
         progressBar.style.width = `${progress}%`;
         progressText.textContent = `${Math.round(progress)}%`;
@@ -434,4 +450,57 @@ sidebarLinks.forEach(link => {
         const section = link.textContent.trim();
         console.log(`切换到: ${section}`);
     });
+});
+
+// Add this after the existing code
+document.getElementById('downloadFavorites').addEventListener('click', async () => {
+    try {
+        // Get the list of favorite files from the favorites table
+        const favoriteRows = document.querySelectorAll('#favoritesList tr');
+        const favorites = Array.from(favoriteRows).map(row => {
+            return row.querySelector('td:nth-child(2)').textContent; // Get the filename from the second column
+        });
+
+        if (favorites.length === 0) {
+            alert('收藏夹为空，请先添加音频文件到收藏夹');
+            return;
+        }
+
+        console.log('Attempting to download files:', favorites);
+
+        const response = await fetch('http://localhost:8000/api/download-favorites/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ favorites }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`下载失败: ${errorText}`);
+        }
+
+        // Create a blob from the response
+        const blob = await response.blob();
+        
+        if (blob.size === 0) {
+            throw new Error('下载的文件为空');
+        }
+        
+        // Create a download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'favorites.zip';
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } catch (error) {
+        console.error('Error downloading favorites:', error);
+        alert(error.message);
+    }
 });
